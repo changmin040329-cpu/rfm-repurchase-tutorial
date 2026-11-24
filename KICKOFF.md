@@ -20,7 +20,7 @@ AI데이터분석및실습 기말 튜토리얼 · **마감 12/21(월) 16:00, 지
 | C | 이정민 | ML 예측, BG/NBD, 가설 H3, 도입 글 초안 | `C_ml_bgnbd` |
 
 ## 시작하기 (각자, 프로젝트 폴더에서)
-Python 3.9~3.12 권장 (3.14는 확인하지 않음).
+Python 3.10~3.12 권장 (CI가 3.10·3.12로 확인한다. 3.14는 확인하지 않음).
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt notebook

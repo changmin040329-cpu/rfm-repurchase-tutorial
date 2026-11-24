@@ -14,7 +14,7 @@ notebooks/C_ml_bgnbd.ipynb         C: ML 예측, H3, BG/NBD
 notebooks/final_tutorial.ipynb       제출용 글의 뼈대 (7개 장, 장마다 담당 표기). A가 조립한다
 outputs/                           B·C가 저장한 점수 파일 scores_<method>.csv (커밋한다)
 (ru.evaluate_scores: 모든 방법이 같이 쓰는 평가 함수 AUC·PR-AUC·lift@10·capture@10)
-requirements.txt                  라이브러리 버전 (Python 3.9 이상)
+requirements.txt                  라이브러리 버전 (Python 3.10~3.12 권장)
 data/                             원본 데이터 (자동 다운로드, 저장소에는 올리지 않음)
 ```
 
