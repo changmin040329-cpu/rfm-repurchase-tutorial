@@ -18,6 +18,9 @@ requirements.txt                  라이브러리 버전 (Python 3.9 이상)
 data/                             원본 데이터 (자동 다운로드, 저장소에는 올리지 않음)
 ```
 
+> 처음이라면 [KICKOFF.md](KICKOFF.md)부터 읽는다 (역할, 일정, 확정 사항).
+> `outputs/`의 CSV는 시작 노트북이 만든 **예시 결과**다. B·C가 모델을 바꾸면 노트북 마지막 셀을 다시 실행해 덮어쓴다.
+
 ## 처음 시작하기
 
 ```bash
@@ -40,6 +43,20 @@ inv  = ru.invoice_table(ru.clean_transactions(ru.load_raw())[0])
 data = ru.make_dataset(inv, ru.SNAPSHOTS["S2"])      # 고객 1행: R, F, M, ..., repurchase
 ru.assert_no_leakage(inv, data, ru.SNAPSHOTS["S2"])  # 새 데이터셋을 만들 때마다 호출
 ```
+
+## 노트북을 커밋할 때
+
+노트북은 출력(그림·표)이 들어 있어 파일이 커지고 변경 내용(diff)이 지저분해진다. 처음 한 번만 아래를 실행하면 커밋할 때 출력이 자동으로 지워진다 (자기 컴퓨터의 저장소 안에서).
+
+```bash
+pip install nbstripout && nbstripout --install
+```
+
+`final_tutorial.ipynb`를 HTML로 변환할 때는 변환 직전에 `Restart & Run All`로 출력을 다시 만든다.
+
+## 브랜치와 Pull Request
+
+`main`은 보호되어 있어 직접 push할 수 없다. 자기 브랜치(`a-eda`, `b-rules`, `c-ml`)에서 작업하고 GitHub에서 Pull Request를 만든다. 다른 팀원 한 명이 승인(Approve)하면 병합할 수 있다.
 
 ## 결과 넘기기
 
