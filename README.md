@@ -23,6 +23,8 @@ data/                             원본 데이터 (자동 다운로드, 저장�
 
 ## 처음 시작하기
 
+맥·윈도우별 상세 안내와 막혔을 때 해결표는 [SETUP.md](SETUP.md)에 있다. 아래는 요약이다.
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate
