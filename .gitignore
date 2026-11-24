@@ -1,0 +1,8 @@
+# raw data is never committed: rfm_utils.download_raw() fetches it
+data/
+__pycache__/
+.ipynb_checkpoints/
+.pytest_cache/
+.venv/
+.DS_Store
+*.pdf

@@ -1,0 +1,16 @@
+# Pinned to the versions the shared code was tested with (Python 3.9+).
+# Add a library here (with a version) the moment you start using it.
+numpy==2.0.2
+pandas==2.3.3
+openpyxl==3.1.5
+matplotlib==3.9.4
+# --- development / checking ---
+pytest==8.4.2
+nbformat==5.10.4
+nbclient==0.10.2
+ipykernel==6.31.0
+# --- added later by B and C (versions to be pinned when installed) ---
+scikit-learn==1.6.1
+scipy==1.13.1
+# scikit-posthocs  (B adds when doing Dunn's test)
+# lifetimes  (check compatibility with numpy/pandas; fallback: pymc-marketing)
