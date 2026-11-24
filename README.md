@@ -14,9 +14,12 @@ notebooks/C_ml_bgnbd.ipynb         C: ML 예측, H3, BG/NBD
 notebooks/final_tutorial.ipynb       제출용 글의 뼈대 (7개 장, 장마다 담당 표기). A가 조립한다
 outputs/                           B·C가 저장한 점수 파일 scores_<method>.csv (커밋한다)
 (ru.evaluate_scores: 모든 방법이 같이 쓰는 평가 함수 AUC·PR-AUC·lift@10·capture@10)
-requirements.txt                  라이브러리 버전 (Python 3.9 이상)
+requirements.txt                  라이브러리 버전 (Python 3.10~3.12 권장)
 data/                             원본 데이터 (자동 다운로드, 저장소에는 올리지 않음)
 ```
+
+> 처음이라면 [KICKOFF.md](KICKOFF.md)부터 읽는다 (역할, 일정, 확정 사항).
+> `outputs/`의 CSV는 시작 노트북이 만든 **예시 결과**다. B·C가 모델을 바꾸면 노트북 마지막 셀을 다시 실행해 덮어쓴다.
 
 ## 처음 시작하기
 
@@ -40,6 +43,49 @@ inv  = ru.invoice_table(ru.clean_transactions(ru.load_raw())[0])
 data = ru.make_dataset(inv, ru.SNAPSHOTS["S2"])      # 고객 1행: R, F, M, ..., repurchase
 ru.assert_no_leakage(inv, data, ru.SNAPSHOTS["S2"])  # 새 데이터셋을 만들 때마다 호출
 ```
+
+## 노트북을 커밋할 때
+
+노트북은 출력(그림·표)이 들어 있어 파일이 커지고 변경 내용(diff)이 지저분해진다. 처음 한 번만 아래를 실행하면 커밋할 때 출력이 자동으로 지워진다 (자기 컴퓨터의 저장소 안에서).
+
+```bash
+pip install nbstripout && nbstripout --install
+```
+
+`final_tutorial.ipynb`를 HTML로 변환할 때는 변환 직전에 `Restart & Run All`로 출력을 다시 만든다.
+
+## 브랜치 전략 (GitHub Flow)
+
+`main`은 보호되어 있어 직접 push할 수 없고, 항상 "실행되는 상태"를 유지한다. 작업 하나(작은 기능, 한 절)마다 브랜치를 새로 만들고, 끝나면 Pull Request로 합친 뒤 **삭제**한다. 작업용 브랜치는 보호되지 않으니 자유롭게 push한다.
+
+| 접두어 | 용도 | 예시 |
+|---|---|---|
+| `a/` `b/` `c/` | 담당 역할의 작업 | `a/eda-plots`, `b/segment-rules`, `c/logistic-cv` |
+| `utils/` | `rfm_utils.py` 수정 | `utils/drop-postage` |
+| `docs/` | 문서만 | `docs/readme-notes` |
+| `final/` | 최종 글 조립 | `final/assemble-ch3` |
+
+```bash
+git checkout main && git pull          # 작업 전에 항상 최신 main으로
+git checkout -b b/segment-rules        # 새 브랜치
+# ... 작업하고 커밋 ...
+git push -u origin b/segment-rules     # GitHub에서 Pull Request 만들기
+```
+
+- 브랜치 수명은 **길어도 2~3일**. 오래 두면 `main`과 달라져 합칠 때 충돌한다. 사람마다 긴 브랜치 하나를 쓰지 않는다.
+- Pull Request는 다른 팀원 **1명이 승인(Approve)**하면 병합한다. 병합은 **Squash and merge**, 병합 후 **Delete branch**.
+- 커밋 메시지는 `A:`, `B:`, `C:` 접두어로 누가 했는지 보이게 한다.
+
+**충돌이 나기 쉬운 파일**
+
+| 파일 | 대응 |
+|---|---|
+| 각자 노트북 | 자기 노트북만 수정한다 |
+| `rfm_utils.py`, `requirements.txt` | `utils/` 브랜치로 수정하고 단톡방에 알린 뒤 빨리 합친다 |
+| `outputs/*.csv` | 방법마다 파일이 다르므로(`scores_<method>.csv`) 자기 파일만 덮어쓴다 |
+| `final_tutorial.ipynb` | **A만 수정한다.** B·C는 자기 노트북에서 완성한 뒤 A에게 알린다 |
+
+**시기별 규칙:** ~12/13 위 흐름대로 작업 · 12/13 배포 초안을 `main`에 두고 Pages 켜기 · 12/17 이후 새 분석 금지, 오류·문장 수정만 · 12/21 `main`의 마지막 상태가 제출물.
 
 ## 결과 넘기기
 
