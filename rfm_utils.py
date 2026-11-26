@@ -109,8 +109,22 @@ def load_raw(data_dir: Path = DATA_DIR) -> pd.DataFrame:
 # --------------------------------------------------------------------------- #
 # Step 1: cleaning (rules are documented because they change the results)
 # --------------------------------------------------------------------------- #
+# StockCodes that are not goods: fees, postage, manual entries, adjustments, tests.
+# Found by listing every code that is not "5 digits + optional letters" (2026-11-26).
+# SP1002 (a real chalkboard product) is deliberately NOT on this list.
+NON_PRODUCT_CODES = frozenset({
+    "POST", "DOT", "C2",            # postage / carriage
+    "M",                            # manual entry: what was bought is unknown
+    "ADJUST", "ADJUST2", "D",       # bookkeeping adjustments, discount
+    "BANK CHARGES", "AMAZONFEE",    # fees
+    "TEST001", "TEST002",           # test rows
+    "PADS",                         # price ~0, not a sale
+    "B", "S", "CRUK",               # bad debt / samples / charity (removed earlier, listed for safety)
+})
+
+
 def clean_transactions(
-    raw: pd.DataFrame, drop_duplicates: bool = True
+    raw: pd.DataFrame, drop_duplicates: bool = True, drop_non_product: bool = True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Clean raw rows and return (clean_rows, report).
 
@@ -118,7 +132,10 @@ def clean_transactions(
       1. cancellations: invoice numbers starting with "C" are returns/cancels
       2. missing Customer ID: we cannot tell who bought, so RFM is impossible
       3. non-positive quantity or price: stock adjustments, not real purchases
-      4. exact duplicate rows (optional, default on): treated as double entries.
+      4. non-product lines (optional, default on): StockCodes in NON_PRODUCT_CODES.
+         An invoice made only of such lines (e.g. postage only) disappears, so it
+         is not counted as an order or as a repurchase.
+      5. exact duplicate rows (optional, default on): treated as double entries.
          They could also be a customer scanning the same item twice at the same
          second, so the team should look at the report before deciding.
     Adds an `amount` column (quantity x price) and a clean integer customer_id.
@@ -137,6 +154,11 @@ def clean_transactions(
     bad = (df["quantity"] <= 0) | (df["price"] <= 0)
     report.append(("removed: quantity <= 0 or price <= 0", int(bad.sum())))
     df = df[~bad]
+
+    if drop_non_product:
+        non_product = df["stock_code"].astype(str).str.strip().str.upper().isin(NON_PRODUCT_CODES)
+        report.append(("removed: non-product lines (postage, fees, manual)", int(non_product.sum())))
+        df = df[~non_product]
 
     if drop_duplicates:
         dup = df.duplicated()

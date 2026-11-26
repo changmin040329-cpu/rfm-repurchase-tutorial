@@ -35,6 +35,10 @@ def _raw():
         ("500", "A", "x", 1, "2011-03-03 09:00", 5.0, np.nan, "UK"),
         # exact duplicate of the first row -> dropped when drop_duplicates=True
         ("100", "A", "x", 2, "2011-01-10 10:00", 5.0, 1.0, "UK"),
+        # postage line on customer 1's first invoice -> dropped, amount unchanged
+        ("100", "POST", "POSTAGE", 1, "2011-01-10 10:00", 18.0, 1.0, "UK"),
+        # customer 3: a postage-only invoice inside the label window -> not a repurchase
+        ("302", "POST", "POSTAGE", 1, "2011-07-01 10:00", 18.0, 3.0, "UK"),
         # filler invoice so the data extends well past the label window
         ("900", "A", "x", 1, "2011-09-30 10:00", 1.0, 9.0, "UK"),
     ]
@@ -57,7 +61,9 @@ def test_cleaning_rules_and_report():
     assert steps["removed: cancellations (invoice starts with C)"] == 1
     assert steps["removed: missing customer id"] == 1
     assert steps["removed: quantity <= 0 or price <= 0"] == 1
+    assert steps["removed: non-product lines (postage, fees, manual)"] == 2
     assert steps["removed: exact duplicate rows"] == 1
+    assert not clean["stock_code"].isin(ru.NON_PRODUCT_CODES).any()
     assert 4 not in set(clean["customer_id"])
     assert clean["customer_id"].dtype == "int64"
     assert (clean["amount"] > 0).all()
@@ -143,3 +149,11 @@ def test_save_and_load_score_frames(inv, tmp_path):
     assert list(back.columns) == ru.SCORE_COLUMNS and len(back) == len(sf)
     with pytest.raises(AssertionError):
         ru.save_score_frame(sf.rename(columns={"score": "s"}), "bad", out_dir=tmp_path)
+
+
+def test_postage_only_invoice_is_not_a_repurchase():
+    data = ru.make_dataset(ru.invoice_table(ru.clean_transactions(_raw())[0]), SNAP)
+    assert data.loc[3, "repurchase"] == 0
+    kept, _ = ru.clean_transactions(_raw(), drop_non_product=False)
+    data_kept = ru.make_dataset(ru.invoice_table(kept), SNAP)
+    assert data_kept.loc[3, "repurchase"] == 1  # what would happen without the rule
